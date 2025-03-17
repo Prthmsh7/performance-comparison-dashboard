@@ -116,15 +116,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, toggleColorMode, mode
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { md: 'none' } }}
-            >
-              <MenuIcon />
-            </IconButton>
+            {isMobile && (
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2 }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
             <Typography variant="h6" noWrap component="div">
               {menuItems.find(item => item.path === location.pathname)?.text || 'Dashboard'}
             </Typography>
@@ -138,9 +140,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, toggleColorMode, mode
             </Tooltip>
             
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant="body1" sx={{ mr: 1 }}>
-                Prathmesh Shukla
-              </Typography>
+              {!isMobile && (
+                <Typography variant="body1" sx={{ mr: 1 }}>
+                  Prathmesh Shukla
+                </Typography>
+              )}
               <Tooltip title="Visit my GitHub profile">
                 <IconButton 
                   component="a" 
@@ -169,7 +173,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, toggleColorMode, mode
           }}
           sx={{
             display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: isMobile ? '100%' : drawerWidth 
+            },
           }}
         >
           {drawer}
@@ -202,4 +209,4 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, toggleColorMode, mode
   );
 };
 
-export default MainLayout; 
+export default MainLayout;

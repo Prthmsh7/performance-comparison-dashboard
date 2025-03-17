@@ -10,7 +10,6 @@ import {
   Select, 
   MenuItem, 
   SelectChangeEvent,
-  Divider,
   Paper,
   Table,
   TableBody,
@@ -56,17 +55,12 @@ const Comparison: React.FC = () => {
 
   // Prepare data for radar chart
   const radarData = compilerMetrics.map(metric => {
-    // Normalize values for radar chart (0-100 scale)
     const normalizeValue = (value: number, metricName: string) => {
-      // For metrics where lower is better
       if (metricName.includes('Time') || metricName.includes('Usage') || metricName.includes('Size')) {
-        // Invert the scale so lower values show as better on the radar
-        const max = Math.max(metric.before, metric.after) * 1.2; // Add 20% buffer
+        const max = Math.max(metric.before, metric.after) * 1.2;
         return 100 - ((value / max) * 100);
-      } 
-      // For metrics where higher is better
-      else {
-        const max = Math.max(metric.before, metric.after) * 1.2; // Add 20% buffer
+      } else {
+        const max = Math.max(metric.before, metric.after) * 1.2;
         return (value / max) * 100;
       }
     };
@@ -81,19 +75,15 @@ const Comparison: React.FC = () => {
     };
   });
 
-  // Calculate overall improvement percentage
   const calculateOverallImprovement = () => {
     let totalImprovement = 0;
     
     compilerMetrics.forEach(metric => {
       const percentChange = ((metric.after - metric.before) / metric.before) * 100;
       
-      // For metrics where lower is better (invert the sign)
       if (metric.name.includes('Time') || metric.name.includes('Usage') || metric.name.includes('Size')) {
         totalImprovement -= percentChange;
-      } 
-      // For metrics where higher is better
-      else {
+      } else {
         totalImprovement += percentChange;
       }
     });
@@ -132,6 +122,11 @@ const Comparison: React.FC = () => {
                     onChange={handleMetricsChange}
                     label="Metrics"
                     renderValue={(selected) => selected.join(', ')}
+                    sx={{
+                      '& .MuiSelect-select': {
+                        backgroundColor: theme.palette.background.paper,
+                      }
+                    }}
                   >
                     {compilerMetrics.map((metric) => (
                       <MenuItem key={metric.name} value={metric.name}>
@@ -151,7 +146,10 @@ const Comparison: React.FC = () => {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%' }}>
+          <Card sx={{ 
+            height: '100%',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.background.paper
+          }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Overall Performance
@@ -167,7 +165,9 @@ const Comparison: React.FC = () => {
                   variant="h2" 
                   sx={{ 
                     fontWeight: 'bold', 
-                    color: parseFloat(overallImprovement) > 0 ? 'success.main' : 'error.main',
+                    color: parseFloat(overallImprovement) > 0 
+                      ? theme.palette.success.main 
+                      : theme.palette.error.main,
                     mb: 1,
                   }}
                 >
@@ -182,7 +182,7 @@ const Comparison: React.FC = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Card>
+          <Card sx={{ backgroundColor: theme.palette.background.paper }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Performance Radar
@@ -192,24 +192,35 @@ const Comparison: React.FC = () => {
               </Typography>
               <ResponsiveContainer width="100%" height={400}>
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="metric" />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                  <PolarGrid stroke={theme.palette.text.secondary} />
+                  <PolarAngleAxis 
+                    tick={{ fill: theme.palette.text.primary }} 
+                    dataKey="metric" 
+                  />
+                  <PolarRadiusAxis 
+                    angle={30} 
+                    domain={[0, 100]} 
+                    tick={{ fill: theme.palette.text.secondary }}
+                  />
                   <Radar
                     name="Before"
                     dataKey="before"
-                    stroke="#8884d8"
-                    fill="#8884d8"
+                    stroke={theme.palette.primary.main}
+                    fill={theme.palette.primary.main}
                     fillOpacity={0.2}
                   />
                   <Radar
                     name="After"
                     dataKey="after"
-                    stroke="#82ca9d"
-                    fill="#82ca9d"
+                    stroke={theme.palette.secondary.main}
+                    fill={theme.palette.secondary.main}
                     fillOpacity={0.2}
                   />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{
+                      color: theme.palette.text.primary
+                    }}
+                  />
                 </RadarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -222,21 +233,27 @@ const Comparison: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Detailed Metrics
               </Typography>
-              <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
+              <TableContainer 
+                component={Paper} 
+                sx={{ 
+                  boxShadow: theme.shadows[1],
+                  backgroundColor: theme.palette.background.paper
+                }}
+              >
                 <Table sx={{ minWidth: 650 }} aria-label="metrics table">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Metric</TableCell>
-                      <TableCell align="right">Before</TableCell>
-                      <TableCell align="right">After</TableCell>
-                      <TableCell align="right">Difference</TableCell>
-                      <TableCell align="right">Change (%)</TableCell>
+                      <TableCell sx={{ color: theme.palette.text.primary }}>Metric</TableCell>
+                      <TableCell align="right" sx={{ color: theme.palette.text.primary }}>Before</TableCell>
+                      <TableCell align="right" sx={{ color: theme.palette.text.primary }}>After</TableCell>
+                      <TableCell align="right" sx={{ color: theme.palette.text.primary }}>Difference</TableCell>
+                      <TableCell align="right" sx={{ color: theme.palette.text.primary }}>Change (%)</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {compilerMetrics.map((metric) => {
                       const difference = metric.after - metric.before;
-                      const percentChange = ((difference) / metric.before) * 100;
+                      const percentChange = (difference / metric.before) * 100;
                       const isImproved = 
                         (metric.name.includes('Time') || metric.name.includes('Usage') || metric.name.includes('Size')) 
                           ? percentChange < 0 
@@ -247,15 +264,21 @@ const Comparison: React.FC = () => {
                           key={metric.name}
                           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
-                          <TableCell component="th" scope="row">
+                          <TableCell component="th" scope="row" sx={{ color: theme.palette.text.primary }}>
                             {metric.name}
                           </TableCell>
-                          <TableCell align="right">{metric.before} {metric.unit}</TableCell>
-                          <TableCell align="right">{metric.after} {metric.unit}</TableCell>
+                          <TableCell align="right" sx={{ color: theme.palette.text.primary }}>
+                            {metric.before} {metric.unit}
+                          </TableCell>
+                          <TableCell align="right" sx={{ color: theme.palette.text.primary }}>
+                            {metric.after} {metric.unit}
+                          </TableCell>
                           <TableCell 
                             align="right"
                             sx={{ 
-                              color: isImproved ? 'success.main' : 'error.main',
+                              color: isImproved 
+                                ? theme.palette.success.main 
+                                : theme.palette.error.main,
                               fontWeight: 'bold'
                             }}
                           >
@@ -264,7 +287,9 @@ const Comparison: React.FC = () => {
                           <TableCell 
                             align="right"
                             sx={{ 
-                              color: isImproved ? 'success.main' : 'error.main',
+                              color: isImproved 
+                                ? theme.palette.success.main 
+                                : theme.palette.error.main,
                               fontWeight: 'bold'
                             }}
                           >
@@ -284,4 +309,4 @@ const Comparison: React.FC = () => {
   );
 };
 
-export default Comparison; 
+export default Comparison;

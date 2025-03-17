@@ -62,6 +62,7 @@ const PullRequests: React.FC = () => {
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    event.stopPropagation();
   };
 
   // Filter PRs based on search term and status filter

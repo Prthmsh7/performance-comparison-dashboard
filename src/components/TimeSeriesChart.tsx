@@ -66,6 +66,7 @@ const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
     event: React.MouseEvent<HTMLElement>,
     newMetric: MetricKey | null,
   ) => {
+    event.stopPropagation();
     if (newMetric !== null) {
       setSelectedMetric(newMetric);
     }
